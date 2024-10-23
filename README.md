@@ -10,16 +10,16 @@ This repository contains a simple, minimal implementation of the PSP34 token in 
 
 To use this crate please add the following line in your `Cargo.toml`:
 ```
-psp34 = { git = "https://github.com/Cardinal-Cryptography/PSP34.git", default-features = false }
+psp34 = { git = "https://github.com/r0gue-io/PSP34.git", default-features = false }
 ```
 
 The contents of this repository can be used in following ways:
 
 ### 1. Ready to use contract
 
-The file [`lib.rs`][lib] contains a ready to use implementation of basic PSP34 token contract. To use it, please check out this repository and compile its contents with [`cargo-contract`][cargo-contract] with the `"contract"` feature enabled:
+The file [`lib.rs`][lib] contains a ready to use implementation of basic PSP34 token contract. To use it, please check out this repository and compile its contents with [Pop CLI](https://github.com/r0gue-io/pop-cli):
 ```
-$ cargo contract build --release --features "contract"
+$ pop build --release
 ```
 ### 2. Cross contract calling with traits
 
