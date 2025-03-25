@@ -2,12 +2,12 @@
 pub mod balance_manager {
     use crate::{data::Id, PSP34Error};
     use ink::prelude::string::String;
-    use ink::{storage::Mapping, H160 as AccountId};
+    use ink::{storage::Mapping, H160};
 
     #[ink::storage_item]
     #[derive(Default, Debug)]
     pub struct Balances {
-        owned_tokens_count: Mapping<AccountId, u32>,
+        owned_tokens_count: Mapping<H160, u32>,
         total_supply: u128,
     }
 
@@ -16,13 +16,13 @@ pub mod balance_manager {
             Default::default()
         }
 
-        pub fn balance_of(&self, owner: &AccountId) -> u32 {
+        pub fn balance_of(&self, owner: &H160) -> u32 {
             self.owned_tokens_count.get(owner).unwrap_or(0)
         }
 
         pub fn increase_balance(
             &mut self,
-            owner: &AccountId,
+            owner: &H160,
             _id: &Id,
             increase_supply: bool,
         ) -> Result<(), PSP34Error> {
@@ -46,7 +46,7 @@ pub mod balance_manager {
             Ok(())
         }
 
-        pub fn decrease_balance(&mut self, owner: &AccountId, _id: &Id, decrease_supply: bool) {
+        pub fn decrease_balance(&mut self, owner: &H160, _id: &Id, decrease_supply: bool) {
             let from_balance = self.balance_of(owner);
             if from_balance <= 1 {
                 self.owned_tokens_count.remove(owner);
@@ -67,12 +67,12 @@ pub mod balance_manager {
 #[cfg(feature = "enumerable")]
 pub mod balance_manager {
     use crate::{data::Id, PSP34Error};
-    use ink::{prelude::vec::Vec, storage::Mapping, H160 as AccountId};
+    use ink::{prelude::vec::Vec, storage::Mapping, H160};
 
     #[ink::storage_item]
     #[derive(Default, Debug)]
     pub struct Balances {
-        enumerable: Mapping<Option<AccountId>, Vec<Id>>,
+        enumerable: Mapping<Option<H160>, Vec<Id>>,
     }
 
     impl Balances {
@@ -80,11 +80,7 @@ pub mod balance_manager {
             Default::default()
         }
 
-        pub fn owners_token_by_index(
-            &self,
-            owner: AccountId,
-            index: u128,
-        ) -> Result<Id, PSP34Error> {
+        pub fn owners_token_by_index(&self, owner: H160, index: u128) -> Result<Id, PSP34Error> {
             self._get_value(&Some(owner), index)
                 .ok_or(PSP34Error::TokenNotExists)
         }
@@ -94,19 +90,19 @@ pub mod balance_manager {
                 .ok_or(PSP34Error::TokenNotExists)
         }
 
-        fn _get_value(&self, key: &Option<AccountId>, index: u128) -> Option<Id> {
+        fn _get_value(&self, key: &Option<H160>, index: u128) -> Option<Id> {
             self.enumerable
                 .get(key)
                 .and_then(|values| values.get(usize::try_from(index).unwrap()).cloned())
         }
 
-        fn _insert(&mut self, key: &Option<AccountId>, value: &Id) {
+        fn _insert(&mut self, key: &Option<H160>, value: &Id) {
             let mut values = self.enumerable.get(key).unwrap_or_default();
             values.push(value.clone());
             self.enumerable.insert(key, &values);
         }
 
-        fn _remove(&mut self, key: &Option<AccountId>, value: &Id) {
+        fn _remove(&mut self, key: &Option<H160>, value: &Id) {
             if let Some(mut values) = self.enumerable.get(key) {
                 if let Some(pos) = values.iter().position(|v| v == value) {
                     values.swap_remove(pos);
@@ -115,7 +111,7 @@ pub mod balance_manager {
             }
         }
 
-        fn _count(&self, key: &Option<AccountId>) -> u128 {
+        fn _count(&self, key: &Option<H160>) -> u128 {
             self.enumerable
                 .get(key)
                 .map_or(0, |values| values.len())
@@ -123,13 +119,13 @@ pub mod balance_manager {
                 .unwrap()
         }
 
-        pub fn balance_of(&self, owner: &AccountId) -> u32 {
+        pub fn balance_of(&self, owner: &H160) -> u32 {
             self._count(&Some(*owner)) as u32
         }
 
         pub fn increase_balance(
             &mut self,
-            owner: &AccountId,
+            owner: &H160,
             id: &Id,
             increase_supply: bool,
         ) -> Result<(), PSP34Error> {
@@ -141,7 +137,7 @@ pub mod balance_manager {
             Ok(())
         }
 
-        pub fn decrease_balance(&mut self, owner: &AccountId, id: &Id, decrease_supply: bool) {
+        pub fn decrease_balance(&mut self, owner: &H160, id: &Id, decrease_supply: bool) {
             self._remove(&Some(*owner), id);
             if self.balance_of(owner) == 0 {
                 self.enumerable.remove(Some(owner));

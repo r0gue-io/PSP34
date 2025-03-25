@@ -3,7 +3,7 @@ This is the PSP34 implementation from [Cardinal Cryptography](https://github.com
 
 **Note that both the implementation and the psp34 standard are under development and are subjected to change. Not production-ready as of yet.**
 
-PSP34 is a non-fungible token standard for WebAssembly smart contracts running on blockchains based on the [Substrate][substrate] framework. It is an equivalent of Ethereum's [ERC-721][erc721]. The definition of the PSP34 standard can be found [here][psp34].
+PSP34 is a non-fungible token standard for RISCV smart contracts running on blockchains based on the [Substrate][substrate] framework. It is an equivalent of Ethereum's [ERC-721][erc721]. The definition of the PSP34 standard can be found [here][psp34].
 
 This repository contains a simple, minimal implementation of the PSP34 token in [ink!][ink] programming language.
 
