@@ -1,8 +1,8 @@
 #[cfg(not(feature = "enumerable"))]
 pub mod balance_manager {
     use crate::{data::Id, PSP34Error};
-    use ink::{primitives::AccountId, storage::Mapping};
     use ink::prelude::string::String;
+    use ink::{storage::Mapping, H160 as AccountId};
 
     #[ink::storage_item]
     #[derive(Default, Debug)]
@@ -67,7 +67,7 @@ pub mod balance_manager {
 #[cfg(feature = "enumerable")]
 pub mod balance_manager {
     use crate::{data::Id, PSP34Error};
-    use ink::{prelude::vec::Vec, primitives::AccountId, storage::Mapping};
+    use ink::{prelude::vec::Vec, storage::Mapping, H160 as AccountId};
 
     #[ink::storage_item]
     #[derive(Default, Debug)]
@@ -141,7 +141,7 @@ pub mod balance_manager {
             Ok(())
         }
 
-        pub fn decrease_balance(&mut self, owner: &AccountId, id: &Id, decrease_supply: bool) {              
+        pub fn decrease_balance(&mut self, owner: &AccountId, id: &Id, decrease_supply: bool) {
             self._remove(&Some(*owner), id);
             if self.balance_of(owner) == 0 {
                 self.enumerable.remove(Some(owner));

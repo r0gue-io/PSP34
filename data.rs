@@ -2,8 +2,8 @@ use crate::balances::balance_manager::Balances;
 use crate::PSP34Error;
 use ink::{
     prelude::{string::String, vec, vec::Vec},
-    primitives::AccountId,
     storage::Mapping,
+    H160,
 };
 
 #[cfg(feature = "std")]
@@ -29,13 +29,13 @@ pub enum Id {
 /// language allows for event definitions outside contracts.
 pub enum PSP34Event {
     Transfer {
-        from: Option<AccountId>,
-        to: Option<AccountId>,
+        from: Option<H160>,
+        to: Option<H160>,
         id: Id,
     },
     Approval {
-        owner: AccountId,
-        operator: AccountId,
+        owner: H160,
+        operator: H160,
         id: Option<Id>,
         approved: bool,
     },
@@ -61,8 +61,8 @@ pub enum PSP34Event {
 #[ink::storage_item]
 #[derive(Debug, Default)]
 pub struct PSP34Data {
-    token_owner: Mapping<Id, AccountId>,
-    operator_approvals: Mapping<(AccountId, AccountId, Option<Id>), ()>,
+    token_owner: Mapping<Id, H160>,
+    operator_approvals: Mapping<(H160, H160, Option<Id>), ()>,
     balance: Balances,
 }
 
@@ -77,23 +77,23 @@ impl PSP34Data {
         self.balance.total_supply()
     }
 
-    pub fn balance_of(&self, owner: AccountId) -> u32 {
+    pub fn balance_of(&self, owner: H160) -> u32 {
         self.balance.balance_of(&owner)
     }
 
-    pub fn owner_of(&self, id: &Id) -> Option<AccountId> {
+    pub fn owner_of(&self, id: &Id) -> Option<H160> {
         self.token_owner.get(id)
     }
 
-    pub fn allowance(&self, owner: AccountId, operator: AccountId, id: Option<&Id>) -> bool {
+    pub fn allowance(&self, owner: H160, operator: H160, id: Option<&Id>) -> bool {
         self.operator_approvals
             .get((owner, operator, &None))
             .is_some()
             || id.is_some() && self.operator_approvals.get((owner, operator, id)).is_some()
     }
 
-    pub fn collection_id(&self, account_id: AccountId) -> Id {
-        Id::Bytes(<_ as AsRef<[u8; 32]>>::as_ref(&account_id).to_vec())
+    pub fn collection_id(&self, account_id: H160) -> Id {
+        Id::Bytes(account_id.as_fixed_bytes().to_vec())
     }
 
     /// Sets a new `approved` for a token `id` or for all tokens if no `id` is provided,
@@ -101,8 +101,8 @@ impl PSP34Data {
     /// Overwrites the previously granted value.
     pub fn approve(
         &mut self,
-        mut caller: AccountId,
-        operator: AccountId,
+        mut caller: H160,
+        operator: H160,
         id: Option<Id>,
         approved: bool,
     ) -> Result<Vec<PSP34Event>, PSP34Error> {
@@ -143,8 +143,8 @@ impl PSP34Data {
     /// Transfers `value` tokens from `caller` to `to`.
     pub fn transfer(
         &mut self,
-        caller: AccountId,
-        to: AccountId,
+        caller: H160,
+        to: H160,
         id: Id,
         _data: Vec<u8>,
     ) -> Result<Vec<PSP34Event>, PSP34Error> {
@@ -174,7 +174,7 @@ impl PSP34Data {
     }
 
     /// Mints a token `id` to `account`.
-    pub fn mint(&mut self, account: AccountId, id: Id) -> Result<Vec<PSP34Event>, PSP34Error> {
+    pub fn mint(&mut self, account: H160, id: Id) -> Result<Vec<PSP34Event>, PSP34Error> {
         if self.owner_of(&id).is_some() {
             return Err(PSP34Error::TokenExists);
         }
@@ -191,8 +191,8 @@ impl PSP34Data {
     /// Burns token `id` from `account`, conducted by `caller`
     pub fn burn(
         &mut self,
-        caller: AccountId,
-        account: AccountId,
+        caller: H160,
+        account: H160,
         id: Id,
     ) -> Result<Vec<PSP34Event>, PSP34Error> {
         if self.owner_of(&id).is_none() {
@@ -212,7 +212,7 @@ impl PSP34Data {
     }
 
     #[cfg(feature = "enumerable")]
-    pub fn owners_token_by_index(&self, owner: AccountId, index: u128) -> Result<Id, PSP34Error> {
+    pub fn owners_token_by_index(&self, owner: H160, index: u128) -> Result<Id, PSP34Error> {
         self.balance.owners_token_by_index(owner, index)
     }
 
