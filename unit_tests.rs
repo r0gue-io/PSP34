@@ -20,7 +20,7 @@ macro_rules! tests {
             }
 
             // Asserts if the given event is a Transfer with particular from_, to_ and value_
-            fn assert_transfer(event: &Event, from_: AccountId, to_: AccountId, id_: Id) {
+            fn assert_transfer(event: &Event, from_: H160, to_: H160, id_: Id) {
                 if let Event::Transfer(Transfer { from, to, id }) = event {
                     assert_eq!(*from, Some(from_), "Transfer event: 'from' mismatch");
                     assert_eq!(*to, Some(to_), "Transfer event: 'to' mismatch");
@@ -33,8 +33,8 @@ macro_rules! tests {
             // Asserts if the given event is a Approval with particular owner_, spender_ and amount_
             fn assert_approval(
                 event: &Event,
-                owner_: AccountId,
-                operator_: AccountId,
+                owner_: H160,
+                operator_: H160,
                 id_: Option<Id>,
                 approved_ : bool,
             ) {
@@ -53,8 +53,8 @@ macro_rules! tests {
                     panic!("Event is not Approval")
                 }
             }
-            
-            fn set_caller(sender: AccountId) {
+
+            fn set_caller(sender: H160) {
                 ink::env::test::set_caller::<E>(sender);
             }
 
@@ -116,7 +116,7 @@ macro_rules! tests {
             }
 
             #[ink::test]
-            fn transfer_emits_event() {                
+            fn transfer_emits_event() {
                 let accounts = default_accounts::<E>();
                 let start = recorded_events().count();
                 // Create a new contract instance.
@@ -133,7 +133,7 @@ macro_rules! tests {
                 assert_eq!(
                     token.transfer(accounts.bob, Id::U8(1), vec![u8::default()]),
                     Ok(())
-                );                
+                );
                 // The second Transfer event takes place
                 assert_eq!(2, recorded_events().count());
                 // The correct event emited
@@ -197,7 +197,7 @@ macro_rules! tests {
             }
 
             #[ink::test]
-            fn approve_emits_event() {                
+            fn approve_emits_event() {
                 let accounts = default_accounts::<E>();
                 let start = recorded_events().count();
                 // Create a new contract instance.

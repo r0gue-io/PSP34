@@ -1,7 +1,4 @@
-use ink::{
-    prelude::vec::Vec,
-    primitives::AccountId,
-};
+use ink::{prelude::vec::Vec, H160};
 
 use crate::data::Id;
 use crate::errors::PSP34Error;
@@ -22,13 +19,13 @@ pub trait PSP34 {
     ///
     /// This represents the amount of unique tokens the owner has.
     #[ink(message)]
-    fn balance_of(&self, owner: AccountId) -> u32;
+    fn balance_of(&self, owner: H160) -> u32;
 
     /// Returns `true` if the operator is approved by the owner to withdraw `id` token.
     ///
     /// If `id` is `None`, returns `true` if the operator is approved to withdraw all owner's tokens.
     #[ink(message)]
-    fn allowance(&self, owner: AccountId, operator: AccountId, id: Option<Id>) -> bool;
+    fn allowance(&self, owner: H160, operator: H160, id: Option<Id>) -> bool;
 
     /// Transfer approved or owned token from caller.
     ///
@@ -42,7 +39,7 @@ pub trait PSP34 {
     ///
     /// Returns `SafeTransferCheckFailed` error if `to` doesn't accept transfer.
     #[ink(message)]
-    fn transfer(&mut self, to: AccountId, id: Id, data: Vec<u8>) -> Result<(), PSP34Error>;
+    fn transfer(&mut self, to: H160, id: Id, data: Vec<u8>) -> Result<(), PSP34Error>;
 
     /// Approves `operator` to withdraw  the `id` token from the caller's account.
     /// If `id` is `None` approves or disapproves the operator for all tokens of the caller.
@@ -55,16 +52,12 @@ pub trait PSP34 {
     ///
     /// Returns `NotApproved` error if caller is not owner of `id`.
     #[ink(message)]
-    fn approve(
-        &mut self,
-        operator: AccountId,
-        id: Option<Id>,
-        approved: bool,
-    ) -> Result<(), PSP34Error>;
+    fn approve(&mut self, operator: H160, id: Option<Id>, approved: bool)
+        -> Result<(), PSP34Error>;
 
     /// Returns the owner of the token if any.
     #[ink(message)]
-    fn owner_of(&self, id: Id) -> Option<AccountId>;
+    fn owner_of(&self, id: Id) -> Option<H160>;
 }
 
 #[ink::trait_definition]
@@ -87,7 +80,7 @@ pub trait PSP34Mintable {
     /// # Errors
     ///
     /// Reverts with `TokenExists`` if token id is already in the library.
-    /// 
+    ///
     /// Reverts with `Custom (max supply exceeded)` if the incremented by 1 total
     /// supply exceeds maximal value of `u128` type.
     #[ink(message)]
@@ -106,7 +99,7 @@ pub trait PSP34Burnable {
     ///
     /// Reverts with `TokenExists` if token id is already in the library.
     #[ink(message)]
-    fn burn(&mut self, account: AccountId, id: Id) -> Result<(), PSP34Error>;
+    fn burn(&mut self, account: H160, id: Id) -> Result<(), PSP34Error>;
 }
 
 #[cfg(feature = "enumerable")]
@@ -115,7 +108,7 @@ pub trait PSP34Enumerable {
     /// Returns a token `Id` owned by `owner` at a given `index` of its token list.
     /// Use along with `balance_of` to enumerate all of ``owner``'s tokens.
     #[ink(message)]
-    fn owners_token_by_index(&self, owner: AccountId, index: u128) -> Result<Id, PSP34Error>;
+    fn owners_token_by_index(&self, owner: H160, index: u128) -> Result<Id, PSP34Error>;
 
     /// Returns a token `Id` at a given `index` of all the tokens stored by the contract.
     /// Use along with `total_supply` to enumerate all tokens.

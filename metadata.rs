@@ -2,7 +2,10 @@ use crate::{
     data::{Id, PSP34Event},
     PSP34Error,
 };
-use ink::{prelude::{vec::Vec, vec}, storage::Mapping};
+use ink::{
+    prelude::{vec, vec::Vec},
+    storage::Mapping,
+};
 
 #[ink::storage_item]
 #[derive(Default, Debug)]

@@ -33,7 +33,7 @@ mod token {
         metadata, Id, PSP34Burnable, PSP34Data, PSP34Error, PSP34Event, PSP34Metadata,
         PSP34Mintable, PSP34,
     };
-    use ink::prelude::vec::Vec;
+    use ink::{prelude::vec::Vec, H160};
 
     #[cfg(feature = "enumerable")]
     use crate::PSP34Enumerable;
@@ -85,9 +85,9 @@ mod token {
     #[ink(event)]
     pub struct Approval {
         #[ink(topic)]
-        owner: AccountId,
+        owner: H160,
         #[ink(topic)]
-        operator: AccountId,
+        operator: H160,
         #[ink(topic)]
         id: Option<Id>,
         approved: bool,
@@ -97,9 +97,9 @@ mod token {
     #[ink(event)]
     pub struct Transfer {
         #[ink(topic)]
-        from: Option<AccountId>,
+        from: Option<H160>,
         #[ink(topic)]
-        to: Option<AccountId>,
+        to: Option<H160>,
         #[ink(topic)]
         id: Id,
     }
@@ -116,7 +116,7 @@ mod token {
     impl PSP34 for Token {
         #[ink(message)]
         fn collection_id(&self) -> Id {
-            self.data.collection_id(self.env().account_id())
+            self.data.collection_id(self.env().address())
         }
 
         #[ink(message)]
@@ -125,19 +125,19 @@ mod token {
         }
 
         #[ink(message)]
-        fn balance_of(&self, owner: AccountId) -> u32 {
+        fn balance_of(&self, owner: H160) -> u32 {
             self.data.balance_of(owner)
         }
 
         #[ink(message)]
-        fn allowance(&self, owner: AccountId, operator: AccountId, id: Option<Id>) -> bool {
+        fn allowance(&self, owner: H160, operator: H160, id: Option<Id>) -> bool {
             self.data.allowance(owner, operator, id.as_ref())
         }
 
         #[ink(message)]
         fn transfer(
             &mut self,
-            to: AccountId,
+            to: H160,
             id: Id,
             data: ink::prelude::vec::Vec<u8>,
         ) -> Result<(), PSP34Error> {
@@ -149,7 +149,7 @@ mod token {
         #[ink(message)]
         fn approve(
             &mut self,
-            operator: AccountId,
+            operator: H160,
             id: Option<Id>,
             approved: bool,
         ) -> Result<(), PSP34Error> {
@@ -161,7 +161,7 @@ mod token {
         }
 
         #[ink(message)]
-        fn owner_of(&self, id: Id) -> Option<AccountId> {
+        fn owner_of(&self, id: Id) -> Option<H160> {
             self.data.owner_of(&id)
         }
     }
@@ -181,7 +181,7 @@ mod token {
     // (7)
     impl PSP34Burnable for Token {
         #[ink(message)]
-        fn burn(&mut self, account: AccountId, id: Id) -> Result<(), PSP34Error> {
+        fn burn(&mut self, account: H160, id: Id) -> Result<(), PSP34Error> {
             // Add security, restrict usage of the message
             todo!();
             let events = self.data.burn(self.env().caller(), account, id)?;
